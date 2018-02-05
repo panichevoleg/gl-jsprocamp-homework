@@ -2,7 +2,7 @@
   Напишите функцию, которая принимает 1 аргумент и возварщает его тип
 */
 function getDataType(variable) {
-
+  return typeof variable;
 }
 
 /*
@@ -14,7 +14,29 @@ function getDataType(variable) {
   'object-function' - если функция
 */
 function getDataTypePseudoName(variable) {
-
+  switch (typeof (variable)) {
+    case 'number':
+    case 'string':
+    case 'boolean':
+      return 'primitive';
+    case null:
+    case 'undefined':
+      return 'primitive-special';
+    case 'function':
+      return 'object-function';
+    case 'object':
+      if (variable === null) {
+        return 'primitive-special';
+      }
+      else if (Array.isArray(variable)) {
+        return 'object-array';
+      }
+      else {
+        return 'object';
+      }
+    default:
+      return 'unknown';
+  }
 }
 
 
@@ -25,7 +47,15 @@ function getDataTypePseudoName(variable) {
   и -1 в другом случае
 */
 function compareByType(a, b) {
-
+  if (a === b) {
+    return 1;
+  }
+  else if (a == b) {
+    return 0;
+  }
+  else {
+    return -1;
+  }
 }
 
 // Numbers
@@ -37,7 +67,12 @@ function compareByType(a, b) {
   в любом другом случае возврвщвет -1
 */
 function increase(value) {
-
+  if (typeof value === 'number') {
+    return ++value;
+  }
+  else {
+    return -1;
+  }
 }
 
 /*
@@ -45,7 +80,12 @@ function increase(value) {
   и в случае если аргумент не Infinity или NaN возвращает строку 'safe' иначе 'danger'
 */
 function testForSafeNumber(value) {
-
+  if (!isFinite(value) || Number.isNaN(value)) {
+    return 'danger';
+  }
+  else {
+    return 'safe';
+  }
 }
 
 
@@ -56,8 +96,8 @@ function testForSafeNumber(value) {
   Напишите функцию, которая принимает 1 аргумент (строку),
   и возвращает массив из елементов строки разделенных по пробелу ' '
 */
-function stringToArray(str) {
-
+  function stringToArray(str) {
+	return str.split(' ');
 }
 
 
@@ -66,7 +106,7 @@ function stringToArray(str) {
   и возвращает часть этой строки до первой запятой
 */
 function getStringPart(str) {
-
+  return str.split(',')[0];
 }
 
 /*
@@ -75,7 +115,13 @@ function getStringPart(str) {
   false в противоположном случае
 */
 function isSingleSymbolMatch(str, symbol) {
-
+  let i = str.indexOf(symbol);
+  if (i >=0 && i === str.lastIndexOf(symbol)) {
+    return i;
+  }
+  else {
+    return false;
+  }
 }
 
 /*
@@ -85,7 +131,10 @@ function isSingleSymbolMatch(str, symbol) {
   или строку разделенную "-" если не задан
 */
 function join(array, separator) {
-
+  if (typeof separator === 'undefined' || !separator) {
+    separator = '-';
+  }
+  return array.join(separator);
 }
 
 
@@ -94,7 +143,7 @@ function join(array, separator) {
   и возвращает один состоящий из элементов перового и второго (последовательно сначала первый потом второй)
 */
 function glue(arrA, arrB) {
-
+  return arrA.concat(arrB);
 }
 
 
@@ -103,7 +152,14 @@ function glue(arrA, arrB) {
   и возвращает другой массив отсортированный от большего к меньшему
 */
 function order(arr) {
-
+  return arr.sort((a, b) => {
+    if (typeof a === 'number' && typeof b === 'number'){
+      return b - a;
+    }
+    else {
+      return Symbol(a).toString() < Symbol(b).toString() ? 1 : -1;
+    }
+  });
 }
 
 
@@ -112,7 +168,7 @@ function order(arr) {
   и возвращает другой без чисел которые меньше 0
 */
 function removeNegative(arr) {
-
+  return arr.filter(a => a >= 0);
 }
 
 /*
@@ -122,7 +178,7 @@ function removeNegative(arr) {
   [1,2,3], [1, 3] => [2]
 */
 function without(arrA, arrB) {
-
+  return arrA.filter(a => !arrB.includes(a));
 }
 
 /*
@@ -133,7 +189,16 @@ function without(arrA, arrB) {
   '12/6' => 2
 */
 function calcExpression(expression) {
+  const pattern = /([-.0-9]+)[\s]*([-+*/])[\s]*([-.0-9]+)/;
+  const matches = expression.match(pattern);
 
+  if (matches &&
+      Number.parseFloat(matches[1]) == matches[1] && 
+      Number.parseFloat(matches[3]) == matches[3]){
+    return eval(matches[1]+matches[2]+matches[3]);
+  } else {
+    return NaN;
+  }
 }
 
 /*
@@ -145,7 +210,19 @@ function calcExpression(expression) {
   '100>5' => true
 */
 function calcComparison(expression) {
-
+  const pattern = /([-.0-9]+)[\s]*(<|>|=|<=|>=)[\s]*([-.0-9]+)/;
+  const matches = expression.match(pattern);
+  
+  if (matches[2] == '=') {
+  	matches[2] = '==';
+  }
+  if (matches &&
+      Number.parseFloat(matches[1]) == matches[1] && 
+      Number.parseFloat(matches[3]) == matches[3]){
+    return eval(matches[1]+matches[2]+matches[3]);
+  } else {
+    throw 'Exception';
+  }
 }
 
 /*
@@ -157,7 +234,18 @@ function calcComparison(expression) {
   { a: 1, b: 2 }, '.c' => exception
 */
 function evalKey(obj, expression) {
+	const exp = expression.slice(1).split('.');
 
+  let res = obj;
+  for (let item of exp) {
+  	if (res[item]) {
+    	res = res[item];    
+    }
+    else {
+    	throw 'Exception';
+    }
+  }
+  return res;
 }
 
 export default {
